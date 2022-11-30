@@ -1,0 +1,10 @@
+GET http://localhost:5862
+
+###
+
+POST http://localhost:5862/userinfo
+content-type: application/json
+
+{
+  "userId" : "6380610d04a32ce99de0a962"
+}
