@@ -53,6 +53,15 @@ async function main() {
     // Accept: application/json
     
 
+    // add New User
+    app. post('/newuser', async(req, res) => {
+      console.log('creating new user', req.body);
+      const {userData} = req.body;
+      const newUser = await User.create(userData);
+      console.log('created new user ', newUser);
+      const userInfo = {username : newUser.username, userAvatarUrl : newUser.avatarUrl, userIdToken : newUser._id};
+      res.status(201).json(userInfo);
+    })
 
 
     // get userinfo by userId
@@ -115,6 +124,10 @@ async function main() {
     app.delete('/listboards/', async(req,res) => {
       console.log('deleting requested listboard');
       const {listboardId} = req.body;
+      const listboard = await Listboard.findById(listboardId);
+      listboard.todos.forEach(async (todoId) => {
+        await Todo.findByIdAndDelete(todoId);
+      })
       await Listboard.findByIdAndDelete(listboardId);
       res.status(201).send('successfully deleted');
     })

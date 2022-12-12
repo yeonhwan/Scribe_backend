@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
   username : {type : String, required : true},
   avatarUrl : String,
-  userId : {type : String, required : true, unique: true},
+  userID : {type : String, required : true},
   listboards : [{
     type : mongoose.ObjectId,
     ref : 'Listboard'

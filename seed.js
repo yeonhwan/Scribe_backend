@@ -8,9 +8,9 @@ mongoose.connect('mongodb://localhost:27017/todoApp');
 // console.log(User, Listboard, Todo);
 const init = async() => {
   try {
-    // await User.deleteMany()
-    // await Listboard.deleteMany()
-    // await Todo.deleteMany()
+    await User.deleteMany()
+    await Listboard.deleteMany()
+    await Todo.deleteMany()
     
     // const user = new User({
     //   username: 'mangoman',
@@ -70,8 +70,10 @@ const init = async() => {
     // await listboard1.save()
     // await listboard2.save()
 
-    const user = await User.findOne({username : 'mangoman'}).populate({path : 'listboards', populate : {path : 'todos'}})
-    console.log(user);
+    // const user = await User.findOne({username : 'mangoman'}).populate({path : 'listboards', populate : {path : 'todos'}})
+    // console.log(user);
+
+    console.log('seeding database successed');
   }
  catch(err) {
   console.log('initiating failed : ', err);
