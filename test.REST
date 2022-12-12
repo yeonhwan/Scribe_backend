@@ -6,5 +6,34 @@ POST http://localhost:5862/userinfo
 content-type: application/json
 
 {
-  "userId" : "6380610d04a32ce99de0a962"
+  "userId" : "63878208a11f403eca272d34"
+}
+
+###
+
+POST http://localhost:5862/listboards/63878208a11f403eca272d38
+content-type: application/json
+
+{
+  "userId" : "63878208a11f403eca272d34"
+}
+###
+
+POST http://localhost:5862/listboards/63878208a11f403eca272d38/create/newtodo
+content-type: application/json
+
+{
+  "todo" : "go shopping"
+}
+
+
+
+###
+
+PATCH http://localhost:5862/listboards/63878208a11f403eca272d38
+content-type: application/json
+
+{
+  "todoId" : "63878208a11f403eca272d3a",
+  "newTodo" : "eat manogo twice"
 }
