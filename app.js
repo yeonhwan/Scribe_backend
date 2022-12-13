@@ -12,9 +12,6 @@ const {Todo} = require('./Models/Todo');
 const { application } = require('express');
 
 const corsOptions = {
-  /* TODO: CORS 설정이 필요합니다. 클라이언트가 어떤 origin인지에 따라 달리 설정할 수 있습니다.
-   * 메서드는 GET, POST, OPTIONS, DELETE를 허용합니다.
-   */
   origin: true,
   methods: ['GET', 'POST', 'OPTIONS', 'DELETE'],
   credentials: true,
@@ -44,7 +41,16 @@ async function main() {
       })
       const {names, emailAddresses} = data.data;
       console.log(names, emailAddresses);
-      res.json({name : names[0].displayName, email : emailAddresses[0].value});
+      console.log(emailAddresses[0].value);
+      const user = await User.findOne({userID : emailAddresses[0].value}).exec();
+      if(user) {
+        console.log('user exists, data is',user);
+        // if a user already exist, send a loginDetail, and userIdToken
+        res.status(200).json({username : user.username, userAvatarUrl : user.avatarUrl, userIdToken : user._id});
+      } else {
+        // if a user doesn't exist, send a userInfo for user to sign up
+        res.status(200).json({name : names[0].displayName, email : emailAddresses[0].value});
+      }
     })
 
     // GET https://people.googleapis.com/v1/people/me?personFields=emailAddresses%2Cnames&key=[YOUR_API_KEY] HTTP/1.1
@@ -53,14 +59,14 @@ async function main() {
     // Accept: application/json
     
 
-    // add New User
+    // add New User & granting Login
     app. post('/newuser', async(req, res) => {
-      console.log('creating new user', req.body);
+      console.log('accepting user data', req.body);
       const {userData} = req.body;
-      const newUser = await User.create(userData);
-      console.log('created new user ', newUser);
-      const userInfo = {username : newUser.username, userAvatarUrl : newUser.avatarUrl, userIdToken : newUser._id};
-      res.status(201).json(userInfo);
+        const newUser = await User.create(userData);
+        console.log('created new user ', newUser);
+        const userInfo = {username : newUser.username, userAvatarUrl : newUser.avatarUrl, userIdToken : newUser._id};
+        res.status(201).json(userInfo);
     })
 
 
@@ -114,8 +120,12 @@ async function main() {
 
     // delete todo
     app.delete('/listboards/:listid', async(req,res) => {
-      console.log('deleting requested todo');
-      const {todoId} = req.body;
+      console.log('deleting requested todo', req.body);
+      const {todoId, listId} = req.body;
+      console.log('todoid', todoId, 'listId', listId);
+      const listboard = await Listboard.findById(listId);
+      listboard.todos = listboard.todos.filter((todo) => todo.toHexString() !== todoId);
+      await listboard.save();
       await Todo.findByIdAndDelete(todoId);
       res.status(201).send('successfully deleted');
     })
@@ -123,11 +133,14 @@ async function main() {
     // delete listboards
     app.delete('/listboards/', async(req,res) => {
       console.log('deleting requested listboard');
-      const {listboardId} = req.body;
+      const {listboardId, userIdToken} = req.body;
       const listboard = await Listboard.findById(listboardId);
       listboard.todos.forEach(async (todoId) => {
         await Todo.findByIdAndDelete(todoId);
       })
+      const user = await User.findById(userIdToken);
+      user.listboards = user.listboards.filter((listboard) => listboard.toHexString() !== listboardId)
+      await user.save();
       await Listboard.findByIdAndDelete(listboardId);
       res.status(201).send('successfully deleted');
     })
